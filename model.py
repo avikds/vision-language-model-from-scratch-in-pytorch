@@ -216,8 +216,12 @@ def residual_add(residual, sublayer_output):
     """Add residual skip connection to a sublayer's output."""
     return residual + sublayer_output
 
-# Step 27 - pre_norm_sublayer (not yet solved)
-# TODO: implement
+# Step 27 - pre_norm_sublayer
+def pre_norm_sublayer(x, gamma, beta, sublayer_fn):
+    """Apply pre-norm: LN(x) -> sublayer -> add residual x."""
+    normalized = layer_norm(x, gamma, beta)
+    sublayer_output = sublayer_fn(normalized)
+    return residual_add(x, sublayer_output)
 
 # Step 28 - vision_encoder_block (not yet solved)
 # TODO: implement
