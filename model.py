@@ -319,8 +319,10 @@ def encode_text_to_ids(text, vocab):
     # Split text on whitespace and map each token to its vocabulary ID.
     return [vocab[token] for token in text.split()]
 
-# Step 36 - embed_token_ids (not yet solved)
-# TODO: implement
+# Step 36 - embed_token_ids
+def embed_token_ids(token_ids, embedding_matrix):
+    """Look up embedding vectors for each token id."""
+    return embedding_matrix[token_ids]
 
 # Step 37 - add_text_position_embeddings (not yet solved)
 # TODO: implement
