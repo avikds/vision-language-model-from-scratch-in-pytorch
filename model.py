@@ -674,8 +674,143 @@ def generate_caption(
 
     return token_ids.tolist()
 
-# Step 57 - initialize_vlm_parameters (not yet solved)
-# TODO: implement
+# Step 57 - initialize_vlm_parameters
+def initialize_vlm_parameters(config, seed=0):
+    """Build the complete parameter dictionary for the vision-language model."""
+    torch.manual_seed(seed)
+
+    image_size = config["image_size"]
+    patch_size = config["patch_size"]
+    num_patches = config["num_patches"]
+    in_channels = config["in_channels"]
+
+    d_vision = config["d_vision"]
+    d_text = config["d_text"]
+
+    num_vision_heads = config["num_vision_heads"]
+    num_decoder_heads = config["num_decoder_heads"]
+
+    num_vision_layers = config["num_vision_layers"]
+    num_decoder_layers = config["num_decoder_layers"]
+
+    mlp_hidden_vision = config["mlp_hidden_vision"]
+    mlp_hidden_text = config["mlp_hidden_text"]
+
+    vocab_size = config["vocab_size"]
+    max_text_len = config["max_text_len"]
+
+    num_image_tokens = config["num_image_tokens"]
+
+    patch_dim = in_channels * patch_size * patch_size
+
+    def randn(*shape):
+        return torch.randn(*shape, requires_grad=True)
+
+    def ones(size):
+        return torch.ones(size, requires_grad=True)
+
+    def zeros(size):
+        return torch.zeros(size, requires_grad=True)
+
+    # Vision encoder blocks.
+    vision_blocks = []
+
+    for _ in range(num_vision_layers):
+        vision_blocks.append({
+            "ln1_gamma": ones(d_vision),
+            "ln1_beta": zeros(d_vision),
+            "ln2_gamma": ones(d_vision),
+            "ln2_beta": zeros(d_vision),
+            "attn": {
+                "wq": randn(d_vision, d_vision),
+                "bq": zeros(d_vision),
+                "wk": randn(d_vision, d_vision),
+                "bk": zeros(d_vision),
+                "wv": randn(d_vision, d_vision),
+                "bv": zeros(d_vision),
+                "wo": randn(d_vision, d_vision),
+                "bo": zeros(d_vision),
+            },
+            "mlp": {
+                "w1": randn(mlp_hidden_vision, d_vision),
+                "b1": zeros(mlp_hidden_vision),
+                "w2": randn(d_vision, mlp_hidden_vision),
+                "b2": zeros(d_vision),
+            },
+        })
+
+    # Decoder blocks.
+    decoder_blocks = []
+
+    for _ in range(num_decoder_layers):
+        decoder_blocks.append({
+            "num_heads": num_decoder_heads,
+            "ln1": {
+                "gamma": ones(d_text),
+                "beta": zeros(d_text),
+            },
+            "ln2": {
+                "gamma": ones(d_text),
+                "beta": zeros(d_text),
+            },
+            "attn": {
+                "wq": randn(d_text, d_text),
+                "bq": zeros(d_text),
+                "wk": randn(d_text, d_text),
+                "bk": zeros(d_text),
+                "wv": randn(d_text, d_text),
+                "bv": zeros(d_text),
+                "wo": randn(d_text, d_text),
+                "bo": zeros(d_text),
+            },
+            "mlp": {
+                "w1": randn(mlp_hidden_text, d_text),
+                "b1": zeros(mlp_hidden_text),
+                "w2": randn(d_text, mlp_hidden_text),
+                "b2": zeros(d_text),
+            },
+        })
+
+    return {
+        "vision": {
+            "patch_size": patch_size,
+            "patch_proj_weight": randn(d_vision, patch_dim),
+            "patch_proj_bias": zeros(d_vision),
+            "class_token": randn(1, 1, d_vision),
+            "position_embeddings": randn(1, num_patches + 1, d_vision),
+            "num_heads": num_vision_heads,
+            "blocks": vision_blocks,
+            "final_ln_gamma": ones(d_vision),
+            "final_ln_beta": zeros(d_vision),
+        },
+
+        "projector": {
+            "w1": randn(d_vision, d_vision),
+            "b1": zeros(d_vision),
+            "w2": randn(d_vision, d_text),
+            "b2": zeros(d_text),
+        },
+
+        "embedding": randn(vocab_size, d_text),
+
+        "pos_embedding": randn(max_text_len, d_text),
+
+        "decoder_blocks": decoder_blocks,
+
+        "final_ln": {
+            "gamma": ones(d_text),
+            "beta": zeros(d_text),
+        },
+
+        "lm_head": {
+            "w_out": randn(d_text, vocab_size),
+            "b_out": zeros(vocab_size),
+        },
+
+        "image_token_id": 1,
+
+        "num_image_tokens": num_image_tokens,
+    }
 
 # Step 58 - collect_parameters (not yet solved)
 # TODO: implement

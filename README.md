@@ -66,7 +66,7 @@ python scaffold.py
 - [x] **54.** top_k_filter
 - [x] **55.** sample_from_logits
 - [x] **56.** generate_caption
-- [ ] **57.** initialize_vlm_parameters
+- [x] **57.** initialize_vlm_parameters
 - [ ] **58.** collect_parameters
 - [ ] **59.** zero_gradients
 - [ ] **60.** training_step
