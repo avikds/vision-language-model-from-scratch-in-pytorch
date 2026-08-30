@@ -272,8 +272,10 @@ def projector_first_layer(patch_features, w1, b1):
     hidden = patch_features @ w1 + b1
     return gelu_activation(hidden)
 
-# Step 32 - projector_second_layer (not yet solved)
-# TODO: implement
+# Step 32 - projector_second_layer
+def projector_second_layer(hidden, w2, b2):
+    """Map hidden activations into the language model embedding space."""
+    return hidden @ w2 + b2
 
 # Step 33 - vision_language_projector (not yet solved)
 # TODO: implement
