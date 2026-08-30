@@ -330,8 +330,10 @@ def add_text_position_embeddings(text_embeddings, position_embeddings):
     T = text_embeddings.shape[0]
     return text_embeddings + position_embeddings[:T]
 
-# Step 38 - find_image_placeholder_positions (not yet solved)
-# TODO: implement
+# Step 38 - find_image_placeholder_positions
+def find_image_placeholder_positions(token_ids, image_token_id):
+    """Return a list of indices where token_ids == image_token_id."""
+    return (token_ids == image_token_id).nonzero(as_tuple=False).flatten().tolist()
 
 # Step 39 - insert_image_tokens (not yet solved)
 # TODO: implement
