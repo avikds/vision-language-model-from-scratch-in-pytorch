@@ -93,8 +93,14 @@ def attention_context(attn_weights, v):
     """Combine attention weights with values to produce context vectors."""
     return torch.matmul(attn_weights, v)
 
-# Step 12 - scaled_dot_product_attention (not yet solved)
-# TODO: implement
+# Step 12 - scaled_dot_product_attention
+def scaled_dot_product_attention(q, k, v, mask=None):
+    """Compose score, scale, mask, softmax, and context into full attention."""
+    scores = compute_attention_scores(q, k)
+    scores = scale_attention_scores(scores, q.shape[-1])
+    scores = apply_attention_mask(scores, mask)
+    attn_weights = attention_softmax(scores)
+    return attention_context(attn_weights, v)
 
 # Step 13 - split_into_heads (not yet solved)
 # TODO: implement
