@@ -197,8 +197,12 @@ def mlp_block(x, params):
     h = mlp_first_layer(x, params["w1"], params["b1"])
     return mlp_second_layer(h, params["w2"], params["b2"])
 
-# Step 24 - compute_layernorm_stats (not yet solved)
-# TODO: implement
+# Step 24 - compute_layernorm_stats
+def compute_layernorm_stats(x, eps=1e-5):
+    # Return mean and biased (population) variance along the last dimension.
+    mean = x.mean(dim=-1, keepdim=True)
+    var = x.var(dim=-1, keepdim=True, unbiased=False)
+    return mean, var
 
 # Step 25 - layer_norm (not yet solved)
 # TODO: implement
