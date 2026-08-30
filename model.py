@@ -128,8 +128,14 @@ def project_qkv(x, wq, bq, wk, bk, wv, bv):
 
     return q, k, v
 
-# Step 16 - split_qkv_into_heads (not yet solved)
-# TODO: implement
+# Step 16 - split_qkv_into_heads
+def split_qkv_into_heads(q, k, v, num_heads):
+    # Reshape q, k, v into multi-head form.
+    q_h = split_into_heads(q, num_heads)
+    k_h = split_into_heads(k, num_heads)
+    v_h = split_into_heads(v, num_heads)
+
+    return q_h, k_h, v_h
 
 # Step 17 - multi_head_attention_scores (not yet solved)
 # TODO: implement
