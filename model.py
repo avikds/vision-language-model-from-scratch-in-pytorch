@@ -292,8 +292,27 @@ def vision_language_projector(patch_features, params):
         params["b2"]
     )
 
-# Step 34 - build_token_vocabulary (not yet solved)
-# TODO: implement
+# Step 34 - build_token_vocabulary
+def build_token_vocabulary(texts, image_token="<image>", pad_token="<pad>"):
+    # Collect all whitespace-separated tokens.
+    tokens = set()
+
+    for text in texts:
+        tokens.update(text.split())
+
+    # Ensure special tokens have fixed IDs and remaining tokens are sorted.
+    tokens.discard(pad_token)
+    tokens.discard(image_token)
+
+    vocab = {
+        pad_token: 0,
+        image_token: 1,
+    }
+
+    for token in sorted(tokens):
+        vocab[token] = len(vocab)
+
+    return vocab
 
 # Step 35 - encode_text_to_ids (not yet solved)
 # TODO: implement
