@@ -56,8 +56,10 @@ def prepend_class_token(patch_embeddings, class_token):
     cls_tokens = class_token.expand(batch_size, -1, -1)
     return torch.cat([cls_tokens, patch_embeddings], dim=1)
 
-# Step 6 - add_position_embeddings (not yet solved)
-# TODO: implement
+# Step 6 - add_position_embeddings
+def add_position_embeddings(tokens, position_embeddings):
+    """Add learnable position embeddings to a (B, S, D) token sequence."""
+    return tokens + position_embeddings
 
 # Step 7 - compute_attention_scores (not yet solved)
 # TODO: implement
