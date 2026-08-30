@@ -946,8 +946,6 @@ def zero_gradients(parameter_list):
             param.grad.zero_()
 
 # Step 60 - training_step
-import torch
-
 def training_step(image, token_ids, labels, params, parameter_list, learning_rate):
     """Run one optimization step and return the detached scalar loss."""
 
