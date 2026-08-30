@@ -155,8 +155,26 @@ def merge_and_output_project(context_heads, wo, bo):
     merged = merge_heads(context_heads)
     return linear_projection(merged, wo, bo)
 
-# Step 19 - multi_head_self_attention (not yet solved)
-# TODO: implement
+# Step 19 - multi_head_self_attention
+def multi_head_self_attention(x, params, num_heads, mask=None):
+    """Run full multi-head self-attention: QKV proj, head split, attention, merge, output proj."""
+    
+    q, k, v = project_qkv(
+        x,
+        params["wq"], params["bq"],
+        params["wk"], params["bk"],
+        params["wv"], params["bv"]
+    )
+
+    q_h, k_h, v_h = split_qkv_into_heads(q, k, v, num_heads)
+
+    context_heads = multi_head_attention_scores(q_h, k_h, v_h, mask)
+
+    return merge_and_output_project(
+        context_heads,
+        params["wo"],
+        params["bo"]
+    )
 
 # Step 20 - gelu_activation (not yet solved)
 # TODO: implement
