@@ -277,8 +277,20 @@ def projector_second_layer(hidden, w2, b2):
     """Map hidden activations into the language model embedding space."""
     return hidden @ w2 + b2
 
-# Step 33 - vision_language_projector (not yet solved)
-# TODO: implement
+# Step 33 - vision_language_projector
+def vision_language_projector(patch_features, params):
+    """Map patch features into the language model embedding space."""
+    hidden = projector_first_layer(
+        patch_features,
+        params["w1"],
+        params["b1"]
+    )
+
+    return projector_second_layer(
+        hidden,
+        params["w2"],
+        params["b2"]
+    )
 
 # Step 34 - build_token_vocabulary (not yet solved)
 # TODO: implement
