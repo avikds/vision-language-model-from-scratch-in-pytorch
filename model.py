@@ -88,8 +88,10 @@ def attention_softmax(masked_scores):
     """Softmax over the last (key) axis of attention scores."""
     return torch.softmax(masked_scores, dim=-1)
 
-# Step 11 - attention_context (not yet solved)
-# TODO: implement
+# Step 11 - attention_context
+def attention_context(attn_weights, v):
+    """Combine attention weights with values to produce context vectors."""
+    return torch.matmul(attn_weights, v)
 
 # Step 12 - scaled_dot_product_attention (not yet solved)
 # TODO: implement
