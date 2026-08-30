@@ -76,8 +76,12 @@ def scale_attention_scores(scores, d_head):
     """Scale raw attention scores so softmax inputs stay well-conditioned."""
     return scores / math.sqrt(d_head)
 
-# Step 9 - apply_attention_mask (not yet solved)
-# TODO: implement
+# Step 9 - apply_attention_mask
+def apply_attention_mask(scores, mask):
+    # Add an additive mask (0 = allowed, -inf = blocked) to attention scores.
+    if mask is None:
+        return scores
+    return scores + mask
 
 # Step 10 - attention_softmax (not yet solved)
 # TODO: implement
