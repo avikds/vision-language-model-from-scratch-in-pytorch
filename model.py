@@ -560,8 +560,25 @@ def shift_logits_and_labels(logits, labels):
 
     return shifted_logits, shifted_labels
 
-# Step 50 - per_position_cross_entropy (not yet solved)
-# TODO: implement
+# Step 50 - per_position_cross_entropy
+def per_position_cross_entropy(shifted_logits, shifted_labels, ignore_index=-100):
+    """Per-position next-token cross-entropy with 0 at ignored positions."""
+    log_probs = torch.log_softmax(shifted_logits, dim=-1)
+
+    safe_labels = shifted_labels.clone()
+    safe_labels[safe_labels == ignore_index] = 0
+
+    losses = -log_probs.gather(
+        dim=-1,
+        index=safe_labels.unsqueeze(-1)
+    ).squeeze(-1)
+
+    losses = losses.masked_fill(
+        shifted_labels == ignore_index,
+        0.0
+    )
+
+    return losses
 
 # Step 51 - masked_mean_loss (not yet solved)
 # TODO: implement
