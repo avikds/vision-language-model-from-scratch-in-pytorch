@@ -447,8 +447,10 @@ def language_model_decoder(x, blocks_params, causal_mask):
 
     return x
 
-# Step 45 - final_layer_norm (not yet solved)
-# TODO: implement
+# Step 45 - final_layer_norm
+def final_layer_norm(x, gamma, beta):
+    # Apply the existing layer normalization primitive.
+    return layer_norm(x, gamma, beta)
 
 # Step 46 - language_model_head (not yet solved)
 # TODO: implement
