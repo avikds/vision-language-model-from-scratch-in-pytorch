@@ -223,8 +223,29 @@ def pre_norm_sublayer(x, gamma, beta, sublayer_fn):
     sublayer_output = sublayer_fn(normalized)
     return residual_add(x, sublayer_output)
 
-# Step 28 - vision_encoder_block (not yet solved)
-# TODO: implement
+# Step 28 - vision_encoder_block
+def vision_encoder_block(x, block_params, num_heads):
+    # Pre-norm multi-head self-attention with residual.
+    x = pre_norm_sublayer(
+        x,
+        block_params["ln1_gamma"],
+        block_params["ln1_beta"],
+        lambda t: multi_head_self_attention(
+            t,
+            block_params["attn"],
+            num_heads
+        )
+    )
+
+    # Pre-norm MLP with residual.
+    x = pre_norm_sublayer(
+        x,
+        block_params["ln2_gamma"],
+        block_params["ln2_beta"],
+        lambda t: mlp_block(t, block_params["mlp"])
+    )
+
+    return x
 
 # Step 29 - vision_encoder (not yet solved)
 # TODO: implement
