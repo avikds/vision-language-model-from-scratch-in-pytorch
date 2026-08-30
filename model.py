@@ -176,8 +176,10 @@ def multi_head_self_attention(x, params, num_heads, mask=None):
         params["bo"]
     )
 
-# Step 20 - gelu_activation (not yet solved)
-# TODO: implement
+# Step 20 - gelu_activation
+def gelu_activation(x):
+    """Apply the exact (erf-based) GELU activation elementwise to x."""
+    return x * 0.5 * (1.0 + torch.erf(x / torch.sqrt(torch.tensor(2.0, device=x.device, dtype=x.dtype))))
 
 # Step 21 - mlp_first_layer (not yet solved)
 # TODO: implement
