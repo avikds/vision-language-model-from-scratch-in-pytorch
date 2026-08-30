@@ -681,24 +681,52 @@ def initialize_vlm_parameters(config, seed=0):
 
     image_size = config["image_size"]
     patch_size = config["patch_size"]
-    num_patches = config["num_patches"]
-    in_channels = config["in_channels"]
+
+    num_patches = config.get(
+        "num_patches",
+        (image_size // patch_size) * (image_size // patch_size)
+    )
+
+    in_channels = config.get("in_channels", 3)
 
     d_vision = config["d_vision"]
-    d_text = config["d_text"]
+    d_text = config.get("d_text", config.get("d_lang"))
 
-    num_vision_heads = config["num_vision_heads"]
-    num_decoder_heads = config["num_decoder_heads"]
+    num_vision_heads = config.get(
+        "num_vision_heads",
+        config.get("n_heads")
+    )
+    num_decoder_heads = config.get(
+        "num_decoder_heads",
+        config.get("n_heads")
+    )
 
-    num_vision_layers = config["num_vision_layers"]
-    num_decoder_layers = config["num_decoder_layers"]
+    num_vision_layers = config.get(
+        "num_vision_layers",
+        config.get("n_layers_vision", 0)
+    )
+    num_decoder_layers = config.get(
+        "num_decoder_layers",
+        config.get("n_layers_decoder", 0)
+    )
 
-    mlp_hidden_vision = config["mlp_hidden_vision"]
-    mlp_hidden_text = config["mlp_hidden_text"]
+    mlp_hidden_vision = config.get(
+        "mlp_hidden_vision",
+        4 * d_vision
+    )
+    mlp_hidden_text = config.get(
+        "mlp_hidden_text",
+        4 * d_text
+    )
 
     vocab_size = config["vocab_size"]
-    max_text_len = config["max_text_len"]
 
+    max_text_len = config.get(
+        "max_text_len",
+        config.get("max_seq_len")
+    )
+
+    image_token_id = config.get("image_token_id", 1)
     num_image_tokens = config["num_image_tokens"]
 
     patch_dim = in_channels * patch_size * patch_size
@@ -706,80 +734,110 @@ def initialize_vlm_parameters(config, seed=0):
     def randn(*shape):
         return torch.randn(*shape, requires_grad=True)
 
-    def ones(size):
-        return torch.ones(size, requires_grad=True)
+    def ones(*shape):
+        return torch.ones(*shape, requires_grad=True)
 
-    def zeros(size):
-        return torch.zeros(size, requires_grad=True)
+    def zeros(*shape):
+        return torch.zeros(*shape, requires_grad=True)
 
-    # Vision encoder blocks.
+    # -------------------------
+    # Vision encoder blocks
+    # -------------------------
     vision_blocks = []
 
     for _ in range(num_vision_layers):
         vision_blocks.append({
             "ln1_gamma": ones(d_vision),
             "ln1_beta": zeros(d_vision),
+
             "ln2_gamma": ones(d_vision),
             "ln2_beta": zeros(d_vision),
+
             "attn": {
                 "wq": randn(d_vision, d_vision),
                 "bq": zeros(d_vision),
+
                 "wk": randn(d_vision, d_vision),
                 "bk": zeros(d_vision),
+
                 "wv": randn(d_vision, d_vision),
                 "bv": zeros(d_vision),
+
                 "wo": randn(d_vision, d_vision),
                 "bo": zeros(d_vision),
             },
+
             "mlp": {
                 "w1": randn(mlp_hidden_vision, d_vision),
                 "b1": zeros(mlp_hidden_vision),
+
                 "w2": randn(d_vision, mlp_hidden_vision),
                 "b2": zeros(d_vision),
             },
         })
 
-    # Decoder blocks.
+    # -------------------------
+    # Language decoder blocks
+    # -------------------------
     decoder_blocks = []
 
     for _ in range(num_decoder_layers):
         decoder_blocks.append({
             "num_heads": num_decoder_heads,
+
             "ln1": {
                 "gamma": ones(d_text),
                 "beta": zeros(d_text),
             },
+
             "ln2": {
                 "gamma": ones(d_text),
                 "beta": zeros(d_text),
             },
+
             "attn": {
                 "wq": randn(d_text, d_text),
                 "bq": zeros(d_text),
+
                 "wk": randn(d_text, d_text),
                 "bk": zeros(d_text),
+
                 "wv": randn(d_text, d_text),
                 "bv": zeros(d_text),
+
                 "wo": randn(d_text, d_text),
                 "bo": zeros(d_text),
             },
+
             "mlp": {
                 "w1": randn(mlp_hidden_text, d_text),
                 "b1": zeros(mlp_hidden_text),
+
                 "w2": randn(d_text, mlp_hidden_text),
                 "b2": zeros(d_text),
             },
         })
 
+    # -------------------------
+    # Complete parameter tree
+    # -------------------------
     return {
         "vision": {
             "patch_size": patch_size,
             "patch_proj_weight": randn(d_vision, patch_dim),
             "patch_proj_bias": zeros(d_vision),
+
             "class_token": randn(1, 1, d_vision),
-            "position_embeddings": randn(1, num_patches + 1, d_vision),
+
+            "position_embeddings": randn(
+                1,
+                num_patches + 1,
+                d_vision
+            ),
+
             "num_heads": num_vision_heads,
             "blocks": vision_blocks,
+
             "final_ln_gamma": ones(d_vision),
             "final_ln_beta": zeros(d_vision),
         },
@@ -787,6 +845,7 @@ def initialize_vlm_parameters(config, seed=0):
         "projector": {
             "w1": randn(d_vision, d_vision),
             "b1": zeros(d_vision),
+
             "w2": randn(d_vision, d_text),
             "b2": zeros(d_text),
         },
@@ -807,7 +866,7 @@ def initialize_vlm_parameters(config, seed=0):
             "b_out": zeros(vocab_size),
         },
 
-        "image_token_id": 1,
+        "image_token_id": image_token_id,
 
         "num_image_tokens": num_image_tokens,
     }
@@ -994,8 +1053,40 @@ def zero_gradients(parameter_list):
         if param.grad is not None:
             param.grad.zero_()
 
-# Step 60 - training_step (not yet solved)
-# TODO: implement
+# Step 60 - training_step
+def training_step(image, token_ids, labels, params, parameter_list, learning_rate):
+    """Run one optimization step: zero grads, forward, loss, backward, SGD update."""
+    zero_gradients(parameter_list)
+
+    logits = vision_language_forward(
+        image,
+        token_ids,
+        params
+    )
+
+    shifted_logits, shifted_labels = shift_logits_and_labels(
+        logits,
+        labels
+    )
+
+    per_position_losses = per_position_cross_entropy(
+        shifted_logits,
+        shifted_labels
+    )
+
+    loss = masked_mean_loss(
+        per_position_losses,
+        shifted_labels
+    )
+
+    loss.backward()
+
+    with torch.no_grad():
+        for param in parameter_list:
+            if param.grad is not None:
+                param -= learning_rate * param.grad
+
+    return loss.detach()
 
 # Step 61 - apply_gradient_update (not yet solved)
 # TODO: implement
