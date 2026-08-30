@@ -675,8 +675,6 @@ def generate_caption(
     return token_ids.tolist()
 
 # Step 57 - initialize_vlm_parameters
-import torch
-
 def initialize_vlm_parameters(config, seed=0):
     """Build the complete parameter dictionary for the vision-language model."""
     torch.manual_seed(seed)
