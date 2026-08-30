@@ -457,8 +457,58 @@ def language_model_head(x, w_out, b_out):
     # Project hidden states (L, D) to vocabulary logits (L, V).
     return x @ w_out + b_out
 
-# Step 47 - encode_image_to_tokens (not yet solved)
-# TODO: implement
+# Step 47 - encode_image_to_tokens
+def encode_image_to_tokens(image, vision_params, projector_params):
+    # Add batch dimension if the input is a single image.
+    if image.dim() == 3:
+        image = image.unsqueeze(0)
+
+    # Split image into patches.
+    patches = split_image_into_patches(
+        image,
+        vision_params["patch_size"]
+    )
+
+    # Flatten patches.
+    flat_patches = flatten_patches(patches)
+
+    # Project patches into ViT embedding space.
+    patch_embeddings = project_patches_to_embeddings(
+        flat_patches,
+        vision_params["patch_proj_weight"],
+        vision_params["patch_proj_bias"]
+    )
+
+    # Prepend [CLS] token.
+    tokens = prepend_class_token(
+        patch_embeddings,
+        vision_params["class_token"]
+    )
+
+    # Add positional embeddings.
+    tokens = add_position_embeddings(
+        tokens,
+        vision_params["position_embeddings"]
+    )
+
+    # Run the Vision Transformer encoder.
+    encoded = vision_encoder(
+        tokens,
+        vision_params,
+        vision_params["num_heads"]
+    )
+
+    # Remove the [CLS] token.
+    patch_features = extract_patch_features(encoded)
+
+    # Project vision features into language embedding space.
+    image_tokens = vision_language_projector(
+        patch_features,
+        projector_params
+    )
+
+    # Remove the batch dimension.
+    return image_tokens.squeeze(0)
 
 # Step 48 - vision_language_forward (not yet solved)
 # TODO: implement
