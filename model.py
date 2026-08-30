@@ -987,8 +987,12 @@ def collect_parameters(params):
     collect(params)
     return parameters
 
-# Step 59 - zero_gradients (not yet solved)
-# TODO: implement
+# Step 59 - zero_gradients
+def zero_gradients(parameter_list):
+    # Reset existing gradients to zero in place.
+    for param in parameter_list:
+        if param.grad is not None:
+            param.grad.zero_()
 
 # Step 60 - training_step (not yet solved)
 # TODO: implement
