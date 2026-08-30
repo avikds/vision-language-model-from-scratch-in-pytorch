@@ -951,45 +951,42 @@ def zero_gradients(parameter_list):
 import torch
 
 def training_step(image, token_ids, labels, params, parameter_list, learning_rate):
-    """Run one optimization step: zero grads, forward, loss, backward, SGD update."""
-    
-    # Ensure the multimodal forward pass has the default image-token ID.
-    forward_params = dict(params)
-    if "image_token_id" not in forward_params:
-        forward_params["image_token_id"] = 1
+    """Run one optimization step: zero grads, forward, loss, backward, SGD update.
+    Return the scalar loss.
+    """
 
-    # Clear gradients.
+    # Clear gradients from the previous step.
     zero_gradients(parameter_list)
 
-    # Full vision-language forward pass.
+    # Run the full vision-language forward pass.
     logits = vision_language_forward(
         image,
         token_ids,
-        forward_params
+        params
     )
 
-    # Prepare next-token prediction targets.
+    # Shift logits and labels for next-token prediction.
     shifted_logits, shifted_labels = shift_logits_and_labels(
         logits,
         labels
     )
 
-    # Compute per-position cross-entropy.
+    # Compute the cross-entropy loss at each valid position.
     per_position_losses = per_position_cross_entropy(
         shifted_logits,
         shifted_labels
     )
 
-    # Compute masked mean loss.
+    # Average over non-ignored positions.
     loss = masked_mean_loss(
         per_position_losses,
         shifted_labels
     )
 
-    # Backpropagate.
+    # Backpropagate through all trainable parameters.
     loss.backward()
 
-    # SGD update.
+    # Apply one SGD update to every parameter.
     with torch.no_grad():
         for parameter in parameter_list:
             if parameter.grad is not None:
