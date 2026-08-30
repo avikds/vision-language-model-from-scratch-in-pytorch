@@ -266,8 +266,11 @@ def extract_patch_features(encoder_output):
     """Drop the [CLS] token from a ViT encoder output."""
     return encoder_output[:, 1:, :]
 
-# Step 31 - projector_first_layer (not yet solved)
-# TODO: implement
+# Step 31 - projector_first_layer
+def projector_first_layer(patch_features, w1, b1):
+    # Apply the first projector linear layer followed by GELU.
+    hidden = patch_features @ w1 + b1
+    return gelu_activation(hidden)
 
 # Step 32 - projector_second_layer (not yet solved)
 # TODO: implement
