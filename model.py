@@ -411,8 +411,33 @@ def build_causal_mask(seq_len):
     )
     return mask
 
-# Step 43 - decoder_block (not yet solved)
-# TODO: implement
+# Step 43 - decoder_block
+def decoder_block(x, params, causal_mask):
+    # Add a batch dimension because multi_head_self_attention expects (B, S, d_model).
+    x_batched = x.unsqueeze(0)
+
+    # Pre-norm masked self-attention with residual.
+    x_batched = pre_norm_sublayer(
+        x_batched,
+        params["ln1"]["gamma"],
+        params["ln1"]["beta"],
+        lambda t: multi_head_self_attention(
+            t,
+            params["attn"],
+            params["num_heads"],
+            mask=causal_mask
+        )
+    )
+
+    # Pre-norm MLP with residual.
+    x_batched = pre_norm_sublayer(
+        x_batched,
+        params["ln2"]["gamma"],
+        params["ln2"]["beta"],
+        lambda t: mlp_block(t, params["mlp"])
+    )
+
+    return x_batched.squeeze(0)
 
 # Step 44 - language_model_decoder (not yet solved)
 # TODO: implement
