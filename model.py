@@ -552,8 +552,13 @@ def vision_language_forward(image, token_ids, params):
         params["lm_head"]["b_out"]
     )
 
-# Step 49 - shift_logits_and_labels (not yet solved)
-# TODO: implement
+# Step 49 - shift_logits_and_labels
+def shift_logits_and_labels(logits, labels):
+    # Align each position's logits with the label at the next position.
+    shifted_logits = logits[:-1]
+    shifted_labels = labels[1:]
+
+    return shifted_logits, shifted_labels
 
 # Step 50 - per_position_cross_entropy (not yet solved)
 # TODO: implement
