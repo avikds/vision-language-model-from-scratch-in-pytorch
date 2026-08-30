@@ -684,7 +684,7 @@ def initialize_vlm_parameters(config, seed=0):
 
     num_patches = config.get(
         "num_patches",
-        (image_size // patch_size) * (image_size // patch_size)
+        (image_size // patch_size) ** 2
     )
 
     in_channels = config.get("in_channels", 3)
@@ -694,17 +694,19 @@ def initialize_vlm_parameters(config, seed=0):
 
     num_vision_heads = config.get(
         "num_vision_heads",
-        config.get("n_heads")
+        config.get("n_heads", 1)
     )
+
     num_decoder_heads = config.get(
         "num_decoder_heads",
-        config.get("n_heads")
+        config.get("n_heads", 1)
     )
 
     num_vision_layers = config.get(
         "num_vision_layers",
         config.get("n_layers_vision", 0)
     )
+
     num_decoder_layers = config.get(
         "num_decoder_layers",
         config.get("n_layers_decoder", 0)
@@ -714,6 +716,7 @@ def initialize_vlm_parameters(config, seed=0):
         "mlp_hidden_vision",
         4 * d_vision
     )
+
     mlp_hidden_text = config.get(
         "mlp_hidden_text",
         4 * d_text
@@ -740,9 +743,9 @@ def initialize_vlm_parameters(config, seed=0):
     def zeros(*shape):
         return torch.zeros(*shape, requires_grad=True)
 
-    # -------------------------
-    # Vision encoder blocks
-    # -------------------------
+    # -------------------------------------------------
+    # Vision encoder
+    # -------------------------------------------------
     vision_blocks = []
 
     for _ in range(num_vision_layers):
@@ -776,9 +779,9 @@ def initialize_vlm_parameters(config, seed=0):
             },
         })
 
-    # -------------------------
-    # Language decoder blocks
-    # -------------------------
+    # -------------------------------------------------
+    # Language decoder
+    # -------------------------------------------------
     decoder_blocks = []
 
     for _ in range(num_decoder_layers):
@@ -818,9 +821,9 @@ def initialize_vlm_parameters(config, seed=0):
             },
         })
 
-    # -------------------------
-    # Complete parameter tree
-    # -------------------------
+    # -------------------------------------------------
+    # Complete VLM parameter tree
+    # -------------------------------------------------
     return {
         "vision": {
             "patch_size": patch_size,
@@ -1054,8 +1057,16 @@ def zero_gradients(parameter_list):
             param.grad.zero_()
 
 # Step 60 - training_step
+import torch
+
 def training_step(image, token_ids, labels, params, parameter_list, learning_rate):
-    """Run one optimization step: zero grads, forward, loss, backward, SGD update."""
+    """Run one optimization step: zero grads, forward, loss, backward, SGD update. Return the scalar loss."""
+    
+    # The project uses 1 as the default image placeholder when it is
+    # not explicitly present in the parameter dictionary.
+    if "image_token_id" not in params:
+        params["image_token_id"] = 1
+
     zero_gradients(parameter_list)
 
     logits = vision_language_forward(
@@ -1082,9 +1093,9 @@ def training_step(image, token_ids, labels, params, parameter_list, learning_rat
     loss.backward()
 
     with torch.no_grad():
-        for param in parameter_list:
-            if param.grad is not None:
-                param -= learning_rate * param.grad
+        for parameter in parameter_list:
+            if parameter.grad is not None:
+                parameter -= learning_rate * parameter.grad
 
     return loss.detach()
 
