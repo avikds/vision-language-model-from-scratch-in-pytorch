@@ -247,8 +247,19 @@ def vision_encoder_block(x, block_params, num_heads):
 
     return x
 
-# Step 29 - vision_encoder (not yet solved)
-# TODO: implement
+# Step 29 - vision_encoder
+def vision_encoder(patch_sequence, encoder_params, num_heads):
+    """Stack ViT encoder blocks then apply a final layer norm to the patch sequence."""
+    x = patch_sequence
+
+    for block_params in encoder_params["blocks"]:
+        x = vision_encoder_block(x, block_params, num_heads)
+
+    return layer_norm(
+        x,
+        encoder_params["final_ln_gamma"],
+        encoder_params["final_ln_beta"]
+    )
 
 # Step 30 - extract_patch_features (not yet solved)
 # TODO: implement
