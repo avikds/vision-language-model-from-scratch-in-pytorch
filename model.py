@@ -919,8 +919,6 @@ def initialize_vlm_parameters(config, seed=0):
     }
 
 # Step 58 - collect_parameters
-import torch
-
 def collect_parameters(params):
     """Recursively collect every trainable leaf tensor from the parameter tree."""
     parameters = []
