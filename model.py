@@ -34,8 +34,10 @@ def flatten_patches(patches):
     # while keeping the (B, num_patches) leading dimensions.
     return patches.reshape(patches.shape[0], patches.shape[1], -1)
 
-# Step 3 - linear_projection (not yet solved)
-# TODO: implement
+# Step 3 - linear_projection
+def linear_projection(x, weight, bias):
+    """Apply y = x @ weight.T + bias with arbitrary leading dims on x."""
+    return x @ weight.T + bias
 
 # Step 4 - project_patches_to_embeddings (not yet solved)
 # TODO: implement
