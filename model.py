@@ -1017,8 +1017,6 @@ def apply_gradient_update(parameters, learning_rate):
     return parameters
 
 # Step 62 - run_training_loop
-import torch
-
 def run_training_loop(params, batch, num_steps, learning_rate):
     """Run num_steps of training_step and return the loss after every step."""
 
