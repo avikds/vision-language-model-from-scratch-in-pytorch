@@ -401,8 +401,15 @@ def build_label_tensor(
         device=token_ids.device
     )
 
-# Step 42 - build_causal_mask (not yet solved)
-# TODO: implement
+# Step 42 - build_causal_mask
+def build_causal_mask(seq_len):
+    """Return a (seq_len, seq_len) additive causal mask."""
+    mask = torch.zeros(seq_len, seq_len)
+    mask = mask.masked_fill(
+        torch.triu(torch.ones(seq_len, seq_len, dtype=torch.bool), diagonal=1),
+        float("-inf")
+    )
+    return mask
 
 # Step 43 - decoder_block (not yet solved)
 # TODO: implement
