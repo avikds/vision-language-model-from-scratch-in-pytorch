@@ -629,8 +629,50 @@ def sample_from_logits(logits):
     token_id = torch.multinomial(probs, num_samples=1)
     return int(token_id.item())
 
-# Step 56 - generate_caption (not yet solved)
-# TODO: implement
+# Step 56 - generate_caption
+def generate_caption(
+    image,
+    prompt_ids,
+    params,
+    max_new_tokens,
+    temperature=1.0,
+    top_k=0,
+    do_sample=False
+):
+    # Make a copy so the caller's prompt_ids tensor is not modified.
+    token_ids = prompt_ids.clone()
+
+    for _ in range(max_new_tokens):
+        # Run the full vision-language model on the current sequence.
+        logits = vision_language_forward(image, token_ids, params)
+
+        # Use the logits at the final sequence position.
+        next_token_logits = logits[-1]
+
+        if do_sample:
+            # Apply temperature and optional top-k filtering before sampling.
+            next_token_logits = apply_temperature(
+                next_token_logits,
+                temperature
+            )
+            next_token_logits = top_k_filter(
+                next_token_logits,
+                top_k
+            )
+            next_token_id = sample_from_logits(next_token_logits)
+        else:
+            # Greedy decoding.
+            next_token_id = greedy_next_token(logits)
+
+        # Append the newly generated token.
+        next_token = torch.tensor(
+            [next_token_id],
+            dtype=token_ids.dtype,
+            device=token_ids.device
+        )
+        token_ids = torch.cat([token_ids, next_token], dim=0)
+
+    return token_ids.tolist()
 
 # Step 57 - initialize_vlm_parameters (not yet solved)
 # TODO: implement
