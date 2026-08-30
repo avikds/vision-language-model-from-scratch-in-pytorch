@@ -111,8 +111,13 @@ def split_into_heads(x, num_heads):
     x = x.reshape(B, S, num_heads, d_head)
     return x.transpose(1, 2)
 
-# Step 14 - merge_heads (not yet solved)
-# TODO: implement
+# Step 14 - merge_heads
+def merge_heads(x):
+    """Merge (B, num_heads, S, d_head) back to (B, S, num_heads*d_head)."""
+    B, num_heads, S, d_head = x.shape
+
+    x = x.transpose(1, 2).contiguous()
+    return x.reshape(B, S, num_heads * d_head)
 
 # Step 15 - project_qkv (not yet solved)
 # TODO: implement
