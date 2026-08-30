@@ -61,8 +61,15 @@ def add_position_embeddings(tokens, position_embeddings):
     """Add learnable position embeddings to a (B, S, D) token sequence."""
     return tokens + position_embeddings
 
-# Step 7 - compute_attention_scores (not yet solved)
-# TODO: implement
+# Step 7 - compute_attention_scores
+def compute_attention_scores(q, k):
+    """Compute raw attention scores Q @ K^T.
+
+    q: (..., Sq, d_head)
+    k: (..., Sk, d_head)
+    returns: (..., Sq, Sk)
+    """
+    return torch.matmul(q, k.transpose(-2, -1))
 
 # Step 8 - scale_attention_scores (not yet solved)
 # TODO: implement
