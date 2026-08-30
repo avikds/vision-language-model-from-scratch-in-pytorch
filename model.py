@@ -604,8 +604,17 @@ def apply_temperature(logits, temperature):
     """Scale logits by dividing by temperature."""
     return logits / temperature
 
-# Step 54 - top_k_filter (not yet solved)
-# TODO: implement
+# Step 54 - top_k_filter
+def top_k_filter(logits, k):
+    """Keep only the top-k logits; set all others to -inf."""
+    if k <= 0 or k >= logits.shape[-1]:
+        return logits
+
+    topk_values, _ = torch.topk(logits, k)
+
+    threshold = topk_values[-1]
+
+    return logits.masked_fill(logits < threshold, float("-inf"))
 
 # Step 55 - sample_from_logits (not yet solved)
 # TODO: implement
