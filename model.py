@@ -119,8 +119,14 @@ def merge_heads(x):
     x = x.transpose(1, 2).contiguous()
     return x.reshape(B, S, num_heads * d_head)
 
-# Step 15 - project_qkv (not yet solved)
-# TODO: implement
+# Step 15 - project_qkv
+def project_qkv(x, wq, bq, wk, bk, wv, bv):
+    # Project x into separate query, key, and value tensors.
+    q = linear_projection(x, wq, bq)
+    k = linear_projection(x, wk, bk)
+    v = linear_projection(x, wv, bv)
+
+    return q, k, v
 
 # Step 16 - split_qkv_into_heads (not yet solved)
 # TODO: implement
