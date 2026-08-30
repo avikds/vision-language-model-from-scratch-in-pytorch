@@ -324,8 +324,11 @@ def embed_token_ids(token_ids, embedding_matrix):
     """Look up embedding vectors for each token id."""
     return embedding_matrix[token_ids]
 
-# Step 37 - add_text_position_embeddings (not yet solved)
-# TODO: implement
+# Step 37 - add_text_position_embeddings
+def add_text_position_embeddings(text_embeddings, position_embeddings):
+    """Add learnable position embeddings to text token embeddings."""
+    T = text_embeddings.shape[0]
+    return text_embeddings + position_embeddings[:T]
 
 # Step 38 - find_image_placeholder_positions (not yet solved)
 # TODO: implement
