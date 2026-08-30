@@ -675,22 +675,31 @@ def generate_caption(
     return token_ids.tolist()
 
 # Step 57 - initialize_vlm_parameters
+import torch
+
 def initialize_vlm_parameters(config, seed=0):
     """Build the complete parameter dictionary for the vision-language model."""
     torch.manual_seed(seed)
 
+    # -------------------------------------------------
+    # Configuration
+    # -------------------------------------------------
     image_size = config["image_size"]
     patch_size = config["patch_size"]
+
+    in_channels = config.get("in_channels", 3)
 
     num_patches = config.get(
         "num_patches",
         (image_size // patch_size) ** 2
     )
 
-    in_channels = config.get("in_channels", 3)
-
     d_vision = config["d_vision"]
-    d_text = config.get("d_text", config.get("d_lang"))
+
+    d_text = config.get(
+        "d_text",
+        config.get("d_lang")
+    )
 
     num_vision_heads = config.get(
         "num_vision_heads",
@@ -729,11 +738,18 @@ def initialize_vlm_parameters(config, seed=0):
         config.get("max_seq_len")
     )
 
-    image_token_id = config.get("image_token_id", 1)
+    image_token_id = config.get(
+        "image_token_id",
+        1
+    )
+
     num_image_tokens = config["num_image_tokens"]
 
     patch_dim = in_channels * patch_size * patch_size
 
+    # -------------------------------------------------
+    # Trainable tensor constructors
+    # -------------------------------------------------
     def randn(*shape):
         return torch.randn(*shape, requires_grad=True)
 
@@ -744,7 +760,7 @@ def initialize_vlm_parameters(config, seed=0):
         return torch.zeros(*shape, requires_grad=True)
 
     # -------------------------------------------------
-    # Vision encoder
+    # Vision Transformer encoder blocks
     # -------------------------------------------------
     vision_blocks = []
 
@@ -780,7 +796,7 @@ def initialize_vlm_parameters(config, seed=0):
         })
 
     # -------------------------------------------------
-    # Language decoder
+    # Causal language-model decoder blocks
     # -------------------------------------------------
     decoder_blocks = []
 
@@ -822,15 +838,24 @@ def initialize_vlm_parameters(config, seed=0):
         })
 
     # -------------------------------------------------
-    # Complete VLM parameter tree
+    # Complete VLM parameter dictionary
     # -------------------------------------------------
     return {
         "vision": {
             "patch_size": patch_size,
-            "patch_proj_weight": randn(d_vision, patch_dim),
+
+            "patch_proj_weight": randn(
+                d_vision,
+                patch_dim
+            ),
+
             "patch_proj_bias": zeros(d_vision),
 
-            "class_token": randn(1, 1, d_vision),
+            "class_token": randn(
+                1,
+                1,
+                d_vision
+            ),
 
             "position_embeddings": randn(
                 1,
@@ -839,6 +864,7 @@ def initialize_vlm_parameters(config, seed=0):
             ),
 
             "num_heads": num_vision_heads,
+
             "blocks": vision_blocks,
 
             "final_ln_gamma": ones(d_vision),
@@ -846,16 +872,30 @@ def initialize_vlm_parameters(config, seed=0):
         },
 
         "projector": {
-            "w1": randn(d_vision, d_vision),
+            "w1": randn(
+                d_vision,
+                d_vision
+            ),
+
             "b1": zeros(d_vision),
 
-            "w2": randn(d_vision, d_text),
+            "w2": randn(
+                d_vision,
+                d_text
+            ),
+
             "b2": zeros(d_text),
         },
 
-        "embedding": randn(vocab_size, d_text),
+        "embedding": randn(
+            vocab_size,
+            d_text
+        ),
 
-        "pos_embedding": randn(max_text_len, d_text),
+        "pos_embedding": randn(
+            max_text_len,
+            d_text
+        ),
 
         "decoder_blocks": decoder_blocks,
 
@@ -865,7 +905,11 @@ def initialize_vlm_parameters(config, seed=0):
         },
 
         "lm_head": {
-            "w_out": randn(d_text, vocab_size),
+            "w_out": randn(
+                d_text,
+                vocab_size
+            ),
+
             "b_out": zeros(vocab_size),
         },
 
@@ -1060,13 +1104,7 @@ def zero_gradients(parameter_list):
 import torch
 
 def training_step(image, token_ids, labels, params, parameter_list, learning_rate):
-    """Run one optimization step: zero grads, forward, loss, backward, SGD update. Return the scalar loss."""
-    
-    # The project uses 1 as the default image placeholder when it is
-    # not explicitly present in the parameter dictionary.
-    if "image_token_id" not in params:
-        params["image_token_id"] = 1
-
+    """Run one optimization step: zero grads, forward, loss, backward, SGD update."""
     zero_gradients(parameter_list)
 
     logits = vision_language_forward(
