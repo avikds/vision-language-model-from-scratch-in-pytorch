@@ -181,8 +181,10 @@ def gelu_activation(x):
     """Apply the exact (erf-based) GELU activation elementwise to x."""
     return x * 0.5 * (1.0 + torch.erf(x / torch.sqrt(torch.tensor(2.0, device=x.device, dtype=x.dtype))))
 
-# Step 21 - mlp_first_layer (not yet solved)
-# TODO: implement
+# Step 21 - mlp_first_layer
+def mlp_first_layer(x, w1, b1):
+    """Apply the first linear layer of the MLP block followed by GELU."""
+    return gelu_activation(linear_projection(x, w1, b1))
 
 # Step 22 - mlp_second_layer (not yet solved)
 # TODO: implement
