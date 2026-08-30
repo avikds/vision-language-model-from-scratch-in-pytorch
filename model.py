@@ -186,8 +186,10 @@ def mlp_first_layer(x, w1, b1):
     """Apply the first linear layer of the MLP block followed by GELU."""
     return gelu_activation(linear_projection(x, w1, b1))
 
-# Step 22 - mlp_second_layer (not yet solved)
-# TODO: implement
+# Step 22 - mlp_second_layer
+def mlp_second_layer(h, w2, b2):
+    # Project the MLP hidden activations back down to d_model.
+    return linear_projection(h, w2, b2)
 
 # Step 23 - mlp_block (not yet solved)
 # TODO: implement
