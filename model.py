@@ -991,8 +991,15 @@ def training_step(image, token_ids, labels, params, parameter_list, learning_rat
     # Return a detached scalar tensor.
     return loss.detach()
 
-# Step 61 - apply_gradient_update (not yet solved)
-# TODO: implement
+# Step 61 - apply_gradient_update
+def apply_gradient_update(parameters, learning_rate):
+    """Apply one in-place vanilla SGD update to every parameter with a gradient."""
+    with torch.no_grad():
+        for p in parameters:
+            if p.grad is not None:
+                p.data -= learning_rate * p.grad.data
+
+    return parameters
 
 # Step 62 - run_training_loop (not yet solved)
 # TODO: implement
