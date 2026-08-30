@@ -102,8 +102,14 @@ def scaled_dot_product_attention(q, k, v, mask=None):
     attn_weights = attention_softmax(scores)
     return attention_context(attn_weights, v)
 
-# Step 13 - split_into_heads (not yet solved)
-# TODO: implement
+# Step 13 - split_into_heads
+def split_into_heads(x, num_heads):
+    """Reshape (B, S, d_model) into (B, num_heads, S, d_head)."""
+    B, S, d_model = x.shape
+    d_head = d_model // num_heads
+
+    x = x.reshape(B, S, num_heads, d_head)
+    return x.transpose(1, 2)
 
 # Step 14 - merge_heads (not yet solved)
 # TODO: implement
