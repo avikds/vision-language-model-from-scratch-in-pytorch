@@ -439,8 +439,13 @@ def decoder_block(x, params, causal_mask):
 
     return x_batched.squeeze(0)
 
-# Step 44 - language_model_decoder (not yet solved)
-# TODO: implement
+# Step 44 - language_model_decoder
+def language_model_decoder(x, blocks_params, causal_mask):
+    # Apply each decoder block sequentially.
+    for params in blocks_params:
+        x = decoder_block(x, params, causal_mask)
+
+    return x
 
 # Step 45 - final_layer_norm (not yet solved)
 # TODO: implement
