@@ -812,8 +812,180 @@ def initialize_vlm_parameters(config, seed=0):
         "num_image_tokens": num_image_tokens,
     }
 
-# Step 58 - collect_parameters (not yet solved)
-# TODO: implement
+# Step 58 - collect_parameters
+def initialize_vlm_parameters(config, seed=0):
+    """Build the complete trainable parameter tree for the VLM."""
+    torch.manual_seed(seed)
+
+    image_size = config["image_size"]
+    patch_size = config["patch_size"]
+
+    in_channels = config.get("in_channels", 3)
+    num_patches = config.get(
+        "num_patches",
+        (image_size // patch_size) * (image_size // patch_size)
+    )
+
+    d_vision = config["d_vision"]
+    d_lang = config.get("d_lang", config.get("d_text"))
+
+    num_vision_heads = config.get(
+        "num_vision_heads",
+        config.get("n_heads")
+    )
+    num_decoder_heads = config.get(
+        "num_decoder_heads",
+        config.get("n_heads")
+    )
+
+    num_vision_layers = config.get(
+        "num_vision_layers",
+        config.get("n_layers_vision", 0)
+    )
+    num_decoder_layers = config.get(
+        "num_decoder_layers",
+        config.get("n_layers_decoder", 0)
+    )
+
+    mlp_hidden_vision = config.get(
+        "mlp_hidden_vision",
+        4 * d_vision
+    )
+    mlp_hidden_text = config.get(
+        "mlp_hidden_text",
+        4 * d_lang
+    )
+
+    vocab_size = config["vocab_size"]
+    max_text_len = config.get(
+        "max_text_len",
+        config.get("max_seq_len")
+    )
+
+    image_token_id = config["image_token_id"]
+    num_image_tokens = config["num_image_tokens"]
+
+    patch_dim = in_channels * patch_size * patch_size
+
+    def randn(*shape):
+        return torch.randn(*shape, requires_grad=True)
+
+    def zeros(*shape):
+        return torch.zeros(*shape, requires_grad=True)
+
+    def ones(*shape):
+        return torch.ones(*shape, requires_grad=True)
+
+    # Vision encoder.
+    vision_blocks = []
+
+    for _ in range(num_vision_layers):
+        vision_blocks.append({
+            "ln1_gamma": ones(d_vision),
+            "ln1_beta": zeros(d_vision),
+            "ln2_gamma": ones(d_vision),
+            "ln2_beta": zeros(d_vision),
+            "attn": {
+                "wq": randn(d_vision, d_vision),
+                "bq": zeros(d_vision),
+                "wk": randn(d_vision, d_vision),
+                "bk": zeros(d_vision),
+                "wv": randn(d_vision, d_vision),
+                "bv": zeros(d_vision),
+                "wo": randn(d_vision, d_vision),
+                "bo": zeros(d_vision),
+            },
+            "mlp": {
+                "w1": randn(mlp_hidden_vision, d_vision),
+                "b1": zeros(mlp_hidden_vision),
+                "w2": randn(d_vision, mlp_hidden_vision),
+                "b2": zeros(d_vision),
+            },
+        })
+
+    # Text decoder.
+    decoder_blocks = []
+
+    for _ in range(num_decoder_layers):
+        decoder_blocks.append({
+            "num_heads": num_decoder_heads,
+            "ln1": {
+                "gamma": ones(d_lang),
+                "beta": zeros(d_lang),
+            },
+            "ln2": {
+                "gamma": ones(d_lang),
+                "beta": zeros(d_lang),
+            },
+            "attn": {
+                "wq": randn(d_lang, d_lang),
+                "bq": zeros(d_lang),
+                "wk": randn(d_lang, d_lang),
+                "bk": zeros(d_lang),
+                "wv": randn(d_lang, d_lang),
+                "bv": zeros(d_lang),
+                "wo": randn(d_lang, d_lang),
+                "bo": zeros(d_lang),
+            },
+            "mlp": {
+                "w1": randn(mlp_hidden_text, d_lang),
+                "b1": zeros(mlp_hidden_text),
+                "w2": randn(d_lang, mlp_hidden_text),
+                "b2": zeros(d_lang),
+            },
+        })
+
+    return {
+        "vision": {
+            "patch_size": patch_size,
+            "patch_proj_weight": randn(d_vision, patch_dim),
+            "patch_proj_bias": zeros(d_vision),
+            "class_token": randn(1, 1, d_vision),
+            "position_embeddings": randn(1, num_patches + 1, d_vision),
+            "num_heads": num_vision_heads,
+            "blocks": vision_blocks,
+            "final_ln_gamma": ones(d_vision),
+            "final_ln_beta": zeros(d_vision),
+        },
+        "projector": {
+            "w1": randn(d_vision, d_vision),
+            "b1": zeros(d_vision),
+            "w2": randn(d_vision, d_lang),
+            "b2": zeros(d_lang),
+        },
+        "embedding": randn(vocab_size, d_lang),
+        "pos_embedding": randn(max_text_len, d_lang),
+        "decoder_blocks": decoder_blocks,
+        "final_ln": {
+            "gamma": ones(d_lang),
+            "beta": zeros(d_lang),
+        },
+        "lm_head": {
+            "w_out": randn(d_lang, vocab_size),
+            "b_out": zeros(vocab_size),
+        },
+        "image_token_id": image_token_id,
+        "num_image_tokens": num_image_tokens,
+    }
+
+
+def collect_parameters(params):
+    """Recursively collect every trainable tensor from the parameter tree."""
+    parameters = []
+
+    def collect(obj):
+        if isinstance(obj, torch.Tensor):
+            if obj.requires_grad:
+                parameters.append(obj)
+        elif isinstance(obj, dict):
+            for value in obj.values():
+                collect(value)
+        elif isinstance(obj, (list, tuple)):
+            for value in obj:
+                collect(value)
+
+    collect(params)
+    return parameters
 
 # Step 59 - zero_gradients (not yet solved)
 # TODO: implement
