@@ -261,8 +261,10 @@ def vision_encoder(patch_sequence, encoder_params, num_heads):
         encoder_params["final_ln_beta"]
     )
 
-# Step 30 - extract_patch_features (not yet solved)
-# TODO: implement
+# Step 30 - extract_patch_features
+def extract_patch_features(encoder_output):
+    """Drop the [CLS] token from a ViT encoder output."""
+    return encoder_output[:, 1:, :]
 
 # Step 31 - projector_first_layer (not yet solved)
 # TODO: implement
