@@ -72,6 +72,8 @@ def compute_attention_scores(q, k):
     return torch.matmul(q, k.transpose(-2, -1))
 
 # Step 8 - scale_attention_scores
+import math
+
 def scale_attention_scores(scores, d_head):
     """Scale raw attention scores so softmax inputs stay well-conditioned."""
     return scores / math.sqrt(d_head)
@@ -137,8 +139,15 @@ def split_qkv_into_heads(q, k, v, num_heads):
 
     return q_h, k_h, v_h
 
-# Step 17 - multi_head_attention_scores (not yet solved)
-# TODO: implement
+# Step 17 - multi_head_attention_scores
+def multi_head_attention_scores(q_h, k_h, v_h, mask=None):
+    """Run scaled dot-product attention in parallel across all heads.
+
+    q_h, k_h, v_h: (B, num_heads, S, d_head)
+    mask: broadcastable to (B, num_heads, S, S) or None
+    returns: (B, num_heads, S, d_head)
+    """
+    return scaled_dot_product_attention(q_h, k_h, v_h, mask)
 
 # Step 18 - merge_and_output_project (not yet solved)
 # TODO: implement
