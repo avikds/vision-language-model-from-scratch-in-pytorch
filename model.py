@@ -452,8 +452,10 @@ def final_layer_norm(x, gamma, beta):
     # Apply the existing layer normalization primitive.
     return layer_norm(x, gamma, beta)
 
-# Step 46 - language_model_head (not yet solved)
-# TODO: implement
+# Step 46 - language_model_head
+def language_model_head(x, w_out, b_out):
+    # Project hidden states (L, D) to vocabulary logits (L, V).
+    return x @ w_out + b_out
 
 # Step 47 - encode_image_to_tokens (not yet solved)
 # TODO: implement
