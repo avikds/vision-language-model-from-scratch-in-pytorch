@@ -510,8 +510,47 @@ def encode_image_to_tokens(image, vision_params, projector_params):
     # Remove the batch dimension.
     return image_tokens.squeeze(0)
 
-# Step 48 - vision_language_forward (not yet solved)
-# TODO: implement
+# Step 48 - vision_language_forward
+def vision_language_forward(image, token_ids, params):
+    # Encode the image into language-space image tokens.
+    image_tokens = encode_image_to_tokens(
+        image,
+        params["vision"],
+        params["projector"]
+    )
+
+    # Build the fused multimodal embedding sequence.
+    fused_embeddings = build_multimodal_embeddings(
+        token_ids,
+        image_tokens,
+        params["embedding"],
+        params["pos_embedding"],
+        params["image_token_id"]
+    )
+
+    # Build a causal mask for the fused sequence.
+    causal_mask = build_causal_mask(fused_embeddings.shape[0])
+
+    # Run the causal language-model decoder.
+    hidden = language_model_decoder(
+        fused_embeddings,
+        params["decoder_blocks"],
+        causal_mask
+    )
+
+    # Apply the final layer normalization.
+    hidden = final_layer_norm(
+        hidden,
+        params["final_ln"]["gamma"],
+        params["final_ln"]["beta"]
+    )
+
+    # Project hidden states to vocabulary logits.
+    return language_model_head(
+        hidden,
+        params["lm_head"]["w_out"],
+        params["lm_head"]["b_out"]
+    )
 
 # Step 49 - shift_logits_and_labels (not yet solved)
 # TODO: implement
