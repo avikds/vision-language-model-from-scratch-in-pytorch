@@ -343,8 +343,32 @@ def insert_image_tokens(text_embeddings, image_tokens, placeholder_position):
 
     return torch.cat([before, image_tokens, after], dim=0)
 
-# Step 40 - build_multimodal_embeddings (not yet solved)
-# TODO: implement
+# Step 40 - build_multimodal_embeddings
+def build_multimodal_embeddings(
+    token_ids,
+    image_tokens,
+    embedding_matrix,
+    position_embeddings,
+    image_token_id
+):
+    # Embed text tokens.
+    text_embeddings = embed_token_ids(token_ids, embedding_matrix)
+
+    # Add positional embeddings to the original text sequence.
+    text_embeddings = add_text_position_embeddings(
+        text_embeddings,
+        position_embeddings
+    )
+
+    # Find the image placeholder and replace it with projected image tokens.
+    positions = find_image_placeholder_positions(token_ids, image_token_id)
+    placeholder_position = positions[0]
+
+    return insert_image_tokens(
+        text_embeddings,
+        image_tokens,
+        placeholder_position
+    )
 
 # Step 41 - build_label_tensor (not yet solved)
 # TODO: implement
