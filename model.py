@@ -948,8 +948,6 @@ def zero_gradients(parameter_list):
             param.grad.zero_()
 
 # Step 60 - training_step
-import torch
-
 def training_step(image, token_ids, labels, params, parameter_list, learning_rate):
     """Run one optimization step: zero grads, forward, loss, backward, SGD update.
     Return the scalar loss.
