@@ -149,8 +149,11 @@ def multi_head_attention_scores(q_h, k_h, v_h, mask=None):
     """
     return scaled_dot_product_attention(q_h, k_h, v_h, mask)
 
-# Step 18 - merge_and_output_project (not yet solved)
-# TODO: implement
+# Step 18 - merge_and_output_project
+def merge_and_output_project(context_heads, wo, bo):
+    """Merge heads back to d_model and apply the output projection."""
+    merged = merge_heads(context_heads)
+    return linear_projection(merged, wo, bo)
 
 # Step 19 - multi_head_self_attention (not yet solved)
 # TODO: implement
