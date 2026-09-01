@@ -73,6 +73,16 @@ python scaffold.py
 - [x] **61.** apply_gradient_update
 - [x] **62.** run_training_loop
 
----
+## Results
 
-Built on Deep-ML.
+```
+Vocab size: 10
+Vocab: {'<pad>': 0, '<image>': 1, 'a': 2, 'blue': 3, 'dot': 4, 'here': 5, 'image': 6, 'red': 7, 'square': 8, 'tiny': 9}
+Initialized 80 parameter tensors.
+Token ids: [1, 2, 7, 8]
+Labels:    [-100, -100, -100, -100, 2, 7, 8]
+Forward logits shape: (7, 10) (expect (S, V=10))
+Loss curve: [7.9116, 7.5915, 4.1395, 3.9269, 3.7417]
+Greedy generated ids:    [1, 2, 7, 1, 6]
+Greedy generated tokens: ['<image>', 'a', 'red', '<image>', 'image']
+```
